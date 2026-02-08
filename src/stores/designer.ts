@@ -17,14 +17,21 @@ export const useDesignerStore = defineStore('designer', () => {
   })
 
   // Actions
-  function addComponent(type: string) {
+  function addComponent(type: string, index?: number) {
     const id = generateId(type)
     const newComponent: ComponentNode = {
       id,
       type,
       props: getDefaultProps(type)
     }
-    components.value.push(newComponent)
+
+    // 如果指定了索引，插入到指定位置；否则添加到末尾
+    if (typeof index === 'number' && index >= 0 && index <= components.value.length) {
+      components.value.splice(index, 0, newComponent)
+    } else {
+      components.value.push(newComponent)
+    }
+
     selectedId.value = id
   }
 
@@ -57,6 +64,18 @@ export const useDesignerStore = defineStore('designer', () => {
     selectedId.value = null
   }
 
+  function moveComponent(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return
+    if (fromIndex < 0 || fromIndex >= components.value.length) return
+    if (toIndex < 0 || toIndex > components.value.length) return
+
+    const [movedComponent] = components.value.splice(fromIndex, 1)
+
+    // 删除元素后，如果目标位置在原位置之后，索引会自动减1，所以直接插入即可
+    const finalIndex = toIndex > fromIndex ? toIndex - 1 : toIndex
+    components.value.splice(finalIndex, 0, movedComponent)
+  }
+
   return {
     // State
     components,
@@ -70,6 +89,7 @@ export const useDesignerStore = defineStore('designer', () => {
     updateComponent,
     selectComponent,
     setHoveredId,
-    clearSelection
+    clearSelection,
+    moveComponent
   }
 })

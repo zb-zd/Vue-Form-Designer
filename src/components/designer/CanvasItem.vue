@@ -6,6 +6,17 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
+    <!-- 拖动手柄 -->
+    <div
+      v-if="isSelected"
+      class="drag-handle"
+      draggable="true"
+      @dragstart="handleDragStart"
+      @click.stop
+    >
+      <el-icon><Rank /></el-icon>
+    </div>
+
     <component
       :is="fieldComponent"
       v-bind="component.props"
@@ -24,16 +35,21 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Delete } from '@element-plus/icons-vue'
+import { Delete, Rank } from '@element-plus/icons-vue'
 import type { ComponentNode } from '@/types'
 import { useDesignerStore } from '@/stores/designer'
 import { fieldComponents } from '@/components/fields'
 
 interface Props {
   component: ComponentNode
+  index: number
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{
+  'drag-start': [index: number, event: DragEvent]
+}>()
+
 const designer = useDesignerStore()
 
 const fieldComponent = computed(() => {
@@ -63,6 +79,10 @@ function handleMouseLeave() {
 function handleDelete() {
   designer.removeComponent(props.component.id)
 }
+
+function handleDragStart(e: DragEvent) {
+  emit('drag-start', props.index, e)
+}
 </script>
 
 <style scoped>
@@ -87,6 +107,31 @@ function handleDelete() {
 .canvas-item.is-selected {
   border-color: #409eff;
   background: #ecf5ff;
+}
+
+.drag-handle {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  cursor: move;
+  color: #909399;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.drag-handle:hover {
+  color: #409eff;
+  border-color: #409eff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
 }
 
 .item-actions {
