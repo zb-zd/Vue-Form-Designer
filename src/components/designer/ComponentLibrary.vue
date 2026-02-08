@@ -92,36 +92,43 @@ function handleDragStart(e: DragEvent, type: string) {
 }
 
 .component-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .component-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 12px;
+  justify-content: center;
+  padding: 16px 8px;
   background: #fff;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   cursor: move;
   transition: all 0.3s;
   user-select: none;
+  min-height: 80px;
 }
 
 .component-item:hover {
   border-color: #409eff;
   background: #ecf5ff;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
 }
 
 .component-icon {
-  font-size: 18px;
+  font-size: 28px;
   color: #409eff;
-  margin-right: 8px;
+  margin-bottom: 8px;
 }
 
 .component-name {
-  font-size: 14px;
+  font-size: 13px;
   color: #303133;
+  text-align: center;
+  line-height: 1.4;
 }
 </style>
