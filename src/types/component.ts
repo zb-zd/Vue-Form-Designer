@@ -1,16 +1,10 @@
-import type { PropConfig } from './propConfig'
+import type { ComponentConfig } from './componentConfig'
 
 /**
  * Component metadata for registry
+ * 现在直接使用 ComponentConfig 类型
  */
-export interface ComponentMeta {
-  type: string
-  name: string
-  icon: string
-  category: 'input' | 'layout' | 'advanced'
-  defaultProps: Record<string, any>
-  propConfigs: PropConfig[]       // 属性配置定义
-}
+export type ComponentMeta = ComponentConfig
 
 /**
  * Component instance on canvas

@@ -13,60 +13,36 @@
           <span class="component-type">{{ componentMeta?.name }}</span>
         </div>
 
-        <!-- 基础属性 -->
-        <el-collapse v-model="activeGroups" class="prop-collapse">
-          <el-collapse-item title="基础属性" name="basic">
-            <el-form label-width="90px" label-position="left" size="default">
-              <el-form-item
-                v-for="config in basicConfigs"
-                :key="config.name"
-                :label="config.label"
-              >
-                <PropEditor
-                  :config="config"
-                  :model-value="designer.selectedComponent.props[config.name]"
-                  @update:model-value="handlePropChange(config.name, $event)"
-                />
-              </el-form-item>
-            </el-form>
-          </el-collapse-item>
-
-          <!-- 高级属性 -->
-          <el-collapse-item
-            v-if="advancedConfigs.length > 0"
-            title="高级属性"
-            name="advanced"
-          >
-            <el-form label-width="90px" label-position="left" size="default">
-              <el-form-item
-                v-for="config in advancedConfigs"
-                :key="config.name"
-                :label="config.label"
-              >
-                <PropEditor
-                  :config="config"
-                  :model-value="designer.selectedComponent.props[config.name]"
-                  @update:model-value="handlePropChange(config.name, $event)"
-                />
-              </el-form-item>
-            </el-form>
-          </el-collapse-item>
-        </el-collapse>
+        <!-- 属性配置（自动从 defaultProps 生成） -->
+        <div class="prop-list">
+          <el-form label-width="90px" label-position="left" size="default">
+            <el-form-item
+              v-for="config in propConfigs"
+              :key="config.name"
+              :label="getPropLabel(config.name)"
+            >
+              <PropEditor
+                :config="config"
+                :model-value="designer.selectedComponent.props[config.name]"
+                @update:model-value="handlePropChange(config.name, $event)"
+              />
+            </el-form-item>
+          </el-form>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useDesignerStore } from '@/stores/designer'
 import { useComponentRegistryStore } from '@/stores/componentRegistry'
+import { getPropLabel } from '@/locales'
 import PropEditor from './PropEditor.vue'
 
 const designer = useDesignerStore()
 const componentRegistry = useComponentRegistryStore()
-
-const activeGroups = ref(['basic', 'advanced'])
 
 // 获取当前选中组件的元数据
 const componentMeta = computed(() => {
@@ -74,20 +50,14 @@ const componentMeta = computed(() => {
   return componentRegistry.getComponent(designer.selectedComponent.type)
 })
 
-// 获取基础属性配置
-const basicConfigs = computed(() => {
+// 获取属性配置列表（从 defaultProps 自动生成）
+const propConfigs = computed(() => {
   if (!componentMeta.value) return []
-  return componentMeta.value.propConfigs.filter(
-    config => !config.group || config.group === 'basic'
-  )
-})
 
-// 获取高级属性配置
-const advancedConfigs = computed(() => {
-  if (!componentMeta.value) return []
-  return componentMeta.value.propConfigs.filter(
-    config => config.group === 'advanced'
-  )
+  // 从 defaultProps 的 keys 生成配置列表
+  return Object.keys(componentMeta.value.defaultProps).map(key => ({
+    name: key
+  }))
 })
 
 function handlePropChange(propName: string, value: any) {

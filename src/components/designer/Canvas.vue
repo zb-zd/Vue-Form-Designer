@@ -1,17 +1,5 @@
 <template>
   <div class="canvas">
-    <div class="canvas-header">
-      <h3>画布</h3>
-      <div class="canvas-actions">
-        <el-button
-          v-if="designer.components.length > 0"
-          size="small"
-          @click="handleClearAll"
-        >
-          清空画布
-        </el-button>
-      </div>
-    </div>
     <div
       class="canvas-content"
       @click="handleCanvasClick"
@@ -33,7 +21,6 @@
 </template>
 
 <script setup lang="ts">
-import { ElMessageBox } from 'element-plus'
 import { useDesignerStore } from '@/stores/designer'
 import CanvasItem from './CanvasItem.vue'
 
@@ -60,48 +47,15 @@ function handleDrop(e: DragEvent) {
     designer.addComponent(componentType)
   }
 }
-
-async function handleClearAll() {
-  try {
-    await ElMessageBox.confirm(
-      '确定要清空画布吗?',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-    designer.components = []
-    designer.clearSelection()
-  } catch {
-    // User cancelled
-  }
-}
 </script>
 
 <style scoped>
 .canvas {
   flex: 1;
-  height: 100vh;
+  height: 100%;
   background: #fff;
   display: flex;
   flex-direction: column;
-}
-
-.canvas-header {
-  padding: 16px;
-  border-bottom: 1px solid #dcdfe6;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.canvas-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
 }
 
 .canvas-content {

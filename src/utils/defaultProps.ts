@@ -115,5 +115,5 @@ export const defaultProps: Record<string, Record<string, any>> = {
  * Get default props for a component type
  */
 export function getDefaultProps(type: string): Record<string, any> {
-  return { ...defaultProps[type] } || {}
+  return defaultProps[type] ? { ...defaultProps[type] } : {}
 }

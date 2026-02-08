@@ -18,7 +18,7 @@ export type PropConfigType =
 export interface PropConfig {
   name: string                    // 属性名称（对应组件的 prop）
   label: string                   // 显示标签
-  type: PropConfigType            // 配置类型
+  type: PropConfigType            // 配置类型（已废弃，现在通过 name 自动匹配组件）
   defaultValue?: any              // 默认值
   options?: Array<{               // 下拉选择/单选的选项
     label: string
@@ -28,6 +28,7 @@ export interface PropConfig {
   max?: number                    // 数字/滑块的最大值
   step?: number                   // 数字/滑块的步进值
   placeholder?: string            // 输入框占位符
+  rows?: number                   // 文本域行数
   tip?: string                    // 提示信息
   group?: string                  // 属性分组（基础属性、高级属性等）
 }
