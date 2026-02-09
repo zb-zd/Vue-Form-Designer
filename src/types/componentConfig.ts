@@ -8,4 +8,5 @@ export interface ComponentConfig {
   icon: string                    // 图标
   category: 'input' | 'layout' | 'advanced'
   defaultProps: Record<string, any>  // 默认属性值（自动匹配对应的 Prop 组件）
+  isContainer?: boolean           // 是否为容器组件（可包含子组件）
 }

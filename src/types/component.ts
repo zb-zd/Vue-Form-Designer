@@ -13,6 +13,8 @@ export interface ComponentNode {
   id: string
   type: string
   props: Record<string, any>
+  children?: ComponentNode[]  // 支持嵌套子组件（用于容器组件）
+  colIndex?: number  // 用于栅格容器的列索引（0-based）
   position?: {
     x: number
     y: number

@@ -1,113 +1,74 @@
 <template>
   <div class="canvas">
-    <div
-      class="canvas-content"
-      @click="handleCanvasClick"
-      @drop="handleDrop"
-      @dragover="handleDragOver"
-      @dragleave="handleDragLeave"
-    >
-      <div v-if="designer.components.length === 0" class="canvas-empty">
-        <el-empty description="从左侧拖拽组件到此处，或点击组件库添加" />
-      </div>
-      <div v-else class="canvas-components">
-        <template v-for="(component, index) in designer.components" :key="component.id">
-          <div v-if="dropPosition === index" class="drop-indicator" />
-          <div class="component-wrapper">
-            <CanvasItem :component="component" :index="index" @drag-start="handleComponentDragStart" />
-          </div>
+    <div class="canvas-content" @click="handleCanvasClick">
+      <VueDraggable
+        v-model="designer.components"
+        :group="{ name: 'components' }"
+        @add="handleAdd"
+        class="canvas-components"
+      >
+        <div v-if="designer.components.length === 0" class="canvas-empty">
+          <el-empty description="从左侧拖拽组件到此处，或点击组件库添加" />
+        </div>
+        <template v-for="(element, index) in designer.components" :key="element.id || `temp-${index}`">
+          <CanvasItem :component="element" :index="index" />
         </template>
-        <div v-if="dropPosition === designer.components.length" class="drop-indicator" />
-      </div>
+      </VueDraggable>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { useDesignerStore } from '@/stores/designer'
+import { useComponentRegistryStore } from '@/stores/componentRegistry'
+import { getDefaultProps } from '@/utils/defaultProps'
 import CanvasItem from './CanvasItem.vue'
 
 const designer = useDesignerStore()
-const dropPosition = ref<number | null>(null)
-const draggedComponentIndex = ref<number | null>(null)
 
 function handleCanvasClick() {
   designer.clearSelection()
 }
 
-function handleDragOver(e: DragEvent) {
-  e.preventDefault()
-  e.stopPropagation()
+function handleAdd(evt: any) {
+  const { newIndex } = evt
 
-  if (e.dataTransfer) {
-    // 如果是拖动现有组件，使用 move；否则使用 copy
-    e.dataTransfer.dropEffect = draggedComponentIndex.value !== null ? 'move' : 'copy'
-  }
+  console.log('Canvas handleAdd:', evt, 'newIndex:', newIndex)
 
-  // 计算插入位置
-  if (designer.components.length > 0) {
-    const canvasContent = e.currentTarget as HTMLElement
-    const componentWrappers = canvasContent.querySelectorAll('.component-wrapper')
+  // vue-draggable-plus 已经把克隆的对象添加到数组中了
+  // 直接从数组中获取占位符对象
+  const placeholder = designer.components[newIndex]
+  console.log('Canvas placeholder:', placeholder)
 
-    let insertIndex = designer.components.length
+  // 检查是否是从组件库克隆的（只有 type，没有 id）
+  if (placeholder && placeholder.type && !placeholder.id) {
+    console.log('Canvas: 从组件库添加新组件', placeholder.type)
+    // 从组件库添加新组件
+    const componentRegistry = useComponentRegistryStore()
+    const componentMeta = componentRegistry.getComponent(placeholder.type)
+    const id = `${placeholder.type}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 
-    for (let i = 0; i < componentWrappers.length; i++) {
-      const wrapper = componentWrappers[i] as HTMLElement
-      const rect = wrapper.getBoundingClientRect()
-      const middle = rect.top + rect.height / 2
-
-      if (e.clientY < middle) {
-        insertIndex = i
-        break
-      }
+    const newComponent: any = {
+      id,
+      type: placeholder.type,
+      props: getDefaultProps(placeholder.type)
     }
 
-    dropPosition.value = insertIndex
-  } else {
-    dropPosition.value = 0
-  }
-}
-
-function handleDragLeave(e: DragEvent) {
-  // 只有当真正离开画布区域时才重置（不是移动到子元素）
-  const relatedTarget = e.relatedTarget as HTMLElement
-  const currentTarget = e.currentTarget as HTMLElement
-
-  if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
-    dropPosition.value = null
-  }
-}
-
-function handleDrop(e: DragEvent) {
-  e.preventDefault()
-  e.stopPropagation()
-
-  const componentType = e.dataTransfer?.getData('componentType')
-  const draggedIndex = e.dataTransfer?.getData('componentIndex')
-
-  if (draggedIndex !== undefined && draggedIndex !== '') {
-    // 拖动现有组件进行重排序
-    const fromIndex = parseInt(draggedIndex, 10)
-    if (dropPosition.value !== null && fromIndex !== dropPosition.value) {
-      designer.moveComponent(fromIndex, dropPosition.value)
+    // 如果是容器组件，初始化 children 数组
+    if (componentMeta?.isContainer) {
+      console.log('Canvas: 初始化容器组件 children 数组')
+      newComponent.children = []
     }
-  } else if (componentType) {
-    // 从组件库拖入新组件
-    const index = dropPosition.value !== null ? dropPosition.value : undefined
-    designer.addComponent(componentType, index)
-  }
 
-  dropPosition.value = null
-  draggedComponentIndex.value = null
-}
+    console.log('Canvas: 创建的新组件:', newComponent)
 
-function handleComponentDragStart(index: number, event: DragEvent) {
-  if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = 'move'
-    event.dataTransfer.setData('componentIndex', index.toString())
+    // 替换占位符为真实组件
+    designer.components.splice(newIndex, 1, newComponent)
+    console.log('Canvas: 替换后的 components:', designer.components)
+    designer.selectComponent(id)
   }
-  draggedComponentIndex.value = index
+  // 如果是从其他容器移动（有 id），vue-draggable-plus 已经处理
 }
 </script>
 
@@ -137,10 +98,7 @@ function handleComponentDragStart(index: number, event: DragEvent) {
 .canvas-components {
   max-width: 800px;
   margin: 0 auto;
-}
-
-.component-wrapper {
-  margin-bottom: 12px;
+  min-height: 400px;
 }
 
 .drop-indicator {

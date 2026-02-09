@@ -36,6 +36,15 @@ export default {
     action: 'Action URL',
     limit: 'File Limit',
     accept: 'Accept',
-    tip: 'Tip'
+    tip: 'Tip',
+
+    // Layout containers
+    gutter: 'Gutter',
+    justify: 'Justify',
+    align: 'Align',
+    span: 'Span',
+    offset: 'Offset',
+    title: 'Title',
+    shadow: 'Shadow'
   }
 }

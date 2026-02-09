@@ -7,19 +7,48 @@
       <div class="component-category">
         <div class="category-title">基础组件</div>
         <div class="component-list">
-          <div
-            v-for="component in inputComponents"
-            :key="component.type"
-            class="component-item"
-            draggable="true"
-            @click="handleAddComponent(component.type)"
-            @dragstart="handleDragStart($event, component.type)"
+          <VueDraggable
+            v-model="inputComponents"
+            :group="{ name: 'components', pull: 'clone', put: false }"
+            :sort="false"
+            :clone="handleClone"
           >
-            <el-icon class="component-icon">
-              <component :is="component.icon" />
-            </el-icon>
-            <span class="component-name">{{ component.name }}</span>
-          </div>
+            <div
+              v-for="element in inputComponents"
+              :key="element.type"
+              class="component-item"
+              @click="handleAddComponent(element.type)"
+            >
+              <el-icon class="component-icon">
+                <component :is="element.icon" />
+              </el-icon>
+              <span class="component-name">{{ element.name }}</span>
+            </div>
+          </VueDraggable>
+        </div>
+      </div>
+
+      <div class="component-category">
+        <div class="category-title">布局容器</div>
+        <div class="component-list">
+          <VueDraggable
+            v-model="layoutComponents"
+            :group="{ name: 'components', pull: 'clone', put: false }"
+            :sort="false"
+            :clone="handleClone"
+          >
+            <div
+              v-for="element in layoutComponents"
+              :key="element.type"
+              class="component-item"
+              @click="handleAddComponent(element.type)"
+            >
+              <el-icon class="component-icon">
+                <component :is="element.icon" />
+              </el-icon>
+              <span class="component-name">{{ element.name }}</span>
+            </div>
+          </VueDraggable>
         </div>
       </div>
     </div>
@@ -28,7 +57,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Edit } from '@element-plus/icons-vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { useComponentRegistryStore } from '@/stores/componentRegistry'
 import { useDesignerStore } from '@/stores/designer'
 
@@ -39,15 +68,16 @@ const inputComponents = computed(() => {
   return componentRegistry.getComponentsByCategory('input')
 })
 
+const layoutComponents = computed(() => {
+  return componentRegistry.getComponentsByCategory('layout')
+})
+
 function handleAddComponent(type: string) {
   designer.addComponent(type)
 }
 
-function handleDragStart(e: DragEvent, type: string) {
-  if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = 'copy'
-    e.dataTransfer.setData('componentType', type)
-  }
+function handleClone(original: any) {
+  return { type: original.type }
 }
 </script>
 

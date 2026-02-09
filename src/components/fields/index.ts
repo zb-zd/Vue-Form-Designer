@@ -10,6 +10,10 @@ import TimePickerField from './TimePickerField.vue'
 import SwitchField from './SwitchField.vue'
 import SliderField from './SliderField.vue'
 import UploadField from './UploadField.vue'
+import RowField from './RowField.vue'
+import ColField from './ColField.vue'
+import PanelField from './PanelField.vue'
+import GridField from './GridField.vue'
 import {
   inputConfig,
   inputNumberConfig,
@@ -23,6 +27,12 @@ import {
   sliderConfig,
   uploadConfig
 } from '@/config/components'
+import {
+  rowConfig,
+  colConfig,
+  panelConfig,
+  gridConfig
+} from '@/config/layoutComponents'
 
 /**
  * Field component registry
@@ -38,7 +48,11 @@ export const fieldComponents: Record<string, any> = {
   timePicker: TimePickerField,
   switch: SwitchField,
   slider: SliderField,
-  upload: UploadField
+  upload: UploadField,
+  row: RowField,
+  col: ColField,
+  panel: PanelField,
+  grid: GridField
 }
 
 export const fieldMetas: ComponentMeta[] = [
@@ -52,5 +66,10 @@ export const fieldMetas: ComponentMeta[] = [
   timePickerConfig,
   switchConfig,
   sliderConfig,
-  uploadConfig
+  uploadConfig,
+  gridConfig,
+  // 暂时禁用其他容器组件，先专注于Grid
+  // rowConfig,
+  // colConfig,
+  // panelConfig
 ]

@@ -36,6 +36,15 @@ export default {
     action: '上传地址',
     limit: '文件数量限制',
     accept: '接受的文件类型',
-    tip: '提示信息'
+    tip: '提示信息',
+
+    // 布局容器
+    gutter: '栅格间距',
+    justify: '水平对齐',
+    align: '垂直对齐',
+    span: '栅格占据列数',
+    offset: '栅格左侧间隔',
+    title: '标题',
+    shadow: '阴影显示'
   }
 }

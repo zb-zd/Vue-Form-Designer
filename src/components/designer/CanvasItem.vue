@@ -10,17 +10,19 @@
     <div
       v-if="isSelected"
       class="drag-handle"
-      draggable="true"
-      @dragstart="handleDragStart"
       @click.stop
     >
       <el-icon><Rank /></el-icon>
     </div>
 
+    <!-- 统一渲染所有组件 -->
     <component
       :is="fieldComponent"
       v-bind="component.props"
+      :children="component.children"
+      :parent-id="component.id"
     />
+
     <div v-if="isSelected" class="item-actions">
       <el-button
         type="danger"
@@ -43,12 +45,10 @@ import { fieldComponents } from '@/components/fields'
 interface Props {
   component: ComponentNode
   index: number
+  parentId?: string
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{
-  'drag-start': [index: number, event: DragEvent]
-}>()
 
 const designer = useDesignerStore()
 
@@ -79,21 +79,22 @@ function handleMouseLeave() {
 function handleDelete() {
   designer.removeComponent(props.component.id)
 }
-
-function handleDragStart(e: DragEvent) {
-  emit('drag-start', props.index, e)
-}
 </script>
 
 <style scoped>
 .canvas-item {
   position: relative;
   padding: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   border: 2px solid transparent;
   border-radius: 4px;
   transition: all 0.3s;
   cursor: pointer;
+}
+
+.canvas-item.is-container {
+  padding: 8px;
+  background: #fafafa;
 }
 
 .canvas-item:hover {
@@ -107,6 +108,10 @@ function handleDragStart(e: DragEvent) {
 .canvas-item.is-selected {
   border-color: #409eff;
   background: #ecf5ff;
+}
+
+.canvas-item.is-container.is-selected {
+  background: #f0f9ff;
 }
 
 .drag-handle {
@@ -126,6 +131,7 @@ function handleDragStart(e: DragEvent) {
   border-radius: 4px;
   transition: all 0.3s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 .drag-handle:hover {
@@ -140,5 +146,48 @@ function handleDragStart(e: DragEvent) {
   right: -12px;
   display: flex;
   gap: 4px;
+  z-index: 10;
+}
+
+.container-drop-zone {
+  width: 100%;
+  min-height: 50px;
+}
+
+.container-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  color: #909399;
+  font-size: 14px;
+  padding: 16px;
+  border: 2px dashed #dcdfe6;
+  border-radius: 4px;
+  background: #fafafa;
+  transition: all 0.3s;
+}
+
+.container-empty:hover {
+  border-color: #409eff;
+  color: #409eff;
+  background: #ecf5ff;
+}
+
+.drop-indicator {
+  height: 3px;
+  background: #409eff;
+  margin: 4px 0;
+  border-radius: 2px;
+  animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>
